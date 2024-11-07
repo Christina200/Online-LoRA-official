@@ -15,7 +15,6 @@ from timm.optim import create_optimizer
 
 from datasets import build_continual_dataloader
 from engine import *
-from online_lora import Online_LoRA
 import utils
 from lora import LoRA_ViT_timm, LoRA_Swin_timm
 
@@ -48,9 +47,9 @@ def main(args):
     # Create training model
     vit_model = create_model(args.model, pretrained=args.pretrained)
     # Choose Transformer: ViT or Swin Transformer
-    # lora_model = LoRA_ViT_timm(vit_model=vit_model, r=args.lora_rank, num_classes=args.nb_classes)
-    lora_model = LoRA_Swin_timm(swin_model=vit_model, r=args.lora_rank, num_classes=args.nb_classes)
-    
+    lora_model = LoRA_ViT_timm(vit_model=vit_model, r=args.lora_rank, num_classes=args.nb_classes)
+    # lora_model = LoRA_Swin_timm(swin_model=vit_model, r=args.lora_rank, num_classes=args.nb_classes)
+
     net = lora_model.to(device)
     model = torch.nn.DataParallel(net)
 

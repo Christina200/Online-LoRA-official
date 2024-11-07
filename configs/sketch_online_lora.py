@@ -1,8 +1,8 @@
 import argparse
 
 def get_args_parser(subparsers):
-    subparsers.add_argument('--batch-size', default=8, type=int, help='Batch size per device')
-    subparsers.add_argument('--nb-batch', default=4, type=int, help='number of batches in a total batch')
+    subparsers.add_argument('--batch-size', default=64, type=int, help='Batch size per device')
+    subparsers.add_argument('--nb-batch', default=1, type=int, help='number of batches in a total batch')
     subparsers.add_argument('--epochs', default=1, type=int)
 
     # Trick parameters
