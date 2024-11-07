@@ -52,12 +52,7 @@ def build_continual_dataloader(args):
             args.nb_classes = 50
         else:
             dataset_list = args.dataset.split(',')
-        
-        # if args.shuffle:
-        #     random.shuffle(dataset_list)
-        # print(dataset_list)
-    
-        # args.nb_classes = 0
+
 
     for i in range(args.num_tasks):
         if args.dataset.startswith('Split-') or args.dataset == 'core50':
@@ -206,7 +201,7 @@ def split_core50_datasets():
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
     ])
-    base_path = '/home/xw6956/l2p-pytorch/datasets/core50_128x128'
+    base_path = 'path/to/core50_128x128'
     train_tasks = ['s1', 's2', 's4', 's5', 's6', 's8', 's9', 's11']
 
     # Combine test datasets

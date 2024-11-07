@@ -1,4 +1,11 @@
+# ------------------------------------------
+# https://github.com/JamesQFreeman/LoRA-ViT.git
 # Sheng Wang at Feb 22 2023
+# ------------------------------------------
+# Modification:
+# Added code for Online LoRA. 
+#       -- Xiwen Wei
+# ------------------------------------------
 
 import math
 
@@ -162,8 +169,6 @@ class LoRA_ViT(nn.Module):
         a_tensors = {f"w_a_{i:03d}": (self.w_As[i].weight + self.wnew_As[i].weight) for i in range(num_layer)}
         b_tensors = {f"w_b_{i:03d}": (self.w_Bs[i].weight + self.wnew_Bs[i].weight) for i in range(num_layer)}
 
-        # newa_tensors = {f"wnew_a_{i:03d}": self.wnew_As[i].weight for i in range(num_layer)}
-        # newb_tensors = {f"wnew_b_{i:03d}": self.wnew_Bs[i].weight for i in range(num_layer)}
         
         _in = self.lora_vit.fc.in_features
         _out = self.lora_vit.fc.out_features
@@ -190,16 +195,6 @@ class LoRA_ViT(nn.Module):
                 saved_key = f"w_b_{i:03d}"
                 saved_tensor = f.get_tensor(saved_key)
                 w_B_linear.weight = Parameter(saved_tensor)
-
-            # for i, wnew_A_linear in enumerate(self.wnew_As):
-            #     saved_key = f"wnew_a_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_A_linear.weight = Parameter(saved_tensor)
-
-            # for i, wnew_B_linear in enumerate(self.wnew_Bs):
-            #     saved_key = f"wnew_b_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_B_linear.weight = Parameter(saved_tensor)
                 
             _in = self.lora_vit.fc.in_features
             _out = self.lora_vit.fc.out_features
@@ -216,8 +211,7 @@ class LoRA_ViT(nn.Module):
         for w_B in self.w_Bs:
             nn.init.zeros_(w_B.weight)
         for wnew_A in self.wnew_As:
-            # nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
-            nn.init.zeros_(wnew_A.weight)
+            nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
         for wnew_B in self.wnew_Bs:
             nn.init.zeros_(wnew_B.weight)
 
@@ -357,36 +351,7 @@ class LoRA_ViT_timm(nn.Module):
         self.proj_3d = nn.Linear(num_classes * 30, num_classes)
         if num_classes > 0:
             self.lora_vit.reset_classifier(num_classes=num_classes)
-            # self.lora_vit.head = nn.Linear(
-            #     self.dim, num_classes)
 
-    # def save_fc_parameters(self, filename: str) -> None:
-    #     r"""Only safetensors is supported now.
-
-    #     pip install safetensor if you do not have one installed yet.
-    #     """
-    #     assert filename.endswith(".safetensors")
-    #     _in = self.lora_vit.head.in_features
-    #     _out = self.lora_vit.head.out_features
-    #     fc_tensors = {f"fc_{_in}in_{_out}out": self.lora_vit.head.weight}
-    #     save_file(fc_tensors, filename)
-
-    # def load_fc_parameters(self, filename: str) -> None:
-    #     r"""Only safetensors is supported now.
-
-    #     pip install safetensor if you do not have one installed yet.
-    #     """
-
-    #     assert filename.endswith(".safetensors")
-    #     _in = self.lora_vit.head.in_features
-    #     _out = self.lora_vit.head.out_features
-    #     with safe_open(filename, framework="pt") as f:
-    #         saved_key = f"fc_{_in}in_{_out}out"
-    #         try:
-    #             saved_tensor = f.get_tensor(saved_key)
-    #             self.lora_vit.head.weight = Parameter(saved_tensor)
-    #         except ValueError:
-    #             print("this fc weight is not for this model")
 
     def save_lora_parameters(self, filename: str) -> None:
         r"""Only safetensors is supported now.
@@ -430,15 +395,6 @@ class LoRA_ViT_timm(nn.Module):
                 saved_tensor = f.get_tensor(saved_key)
                 w_B_linear.weight = Parameter(saved_tensor)
 
-            # for i, wnew_A_linear in enumerate(self.wnew_As):
-            #     saved_key = f"w_a_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_A_linear.weight = Parameter(saved_tensor)
-
-            # for i, wnew_B_linear in enumerate(self.wnew_Bs):
-            #     saved_key = f"w_b_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_B_linear.weight = Parameter(saved_tensor)
                 
             _in = self.lora_vit.head.in_features
             _out = self.lora_vit.head.out_features
@@ -468,23 +424,13 @@ class LoRA_ViT_timm(nn.Module):
         for w_B in self.w_Bs:
             nn.init.zeros_(w_B.weight)
         for wnew_A in self.wnew_As:
-            # nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
-            nn.init.zeros_(wnew_A.weight)
+            nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
         for wnew_B in self.wnew_Bs:
             nn.init.zeros_(wnew_B.weight)
 
     def forward(self, x: Tensor, use_new: bool = True) -> Tensor:
         if use_new:
             return self.lora_vit(x)
-
-
-
-    # def forward(self, x: Tensor) -> Tensor:
-    #     x = rearrange(x, "b s c h w -> (b s) c h w", s=30)
-    #     x = self.lora_vit(x)
-    #     x = rearrange(x, "(b s) d -> b (s d)", s=30)
-    #     x = self.proj_3d(x)
-    #     return x
     
     
 class _LoRA_qkv_timm_x(nn.Module):
@@ -551,8 +497,6 @@ class LoRA_ViT_timm_x(nn.Module):
 
         self.lora_layer = list(range(len(vit_model.blocks)))
 
-        # dim = vit_model.head.in_features
-        # create for storage, then we can init them or load weights
         self.w_As = []  # These are linear layers
         self.w_Bs = []
         self.wnew_As = []
@@ -647,18 +591,13 @@ class LoRA_ViT_timm_x(nn.Module):
                 wnew_a_linear_vs,
                 wnew_b_linear_vs,
             )
-        # self.reset_parameters()
-        # self.proj_3d = nn.Linear(num_classes * 30, num_classes)
+
         for file_path in lora_files:
             with safe_open(file_path, framework="pt") as f:
                 for key in f.keys():
                     if 'fc_' in key:
                         self.fc_loras.append(f.get_tensor(key))
                         break
-        # if num_classes > 0:
-        #     self.lora_vit.reset_classifier(num_classes=num_classes)
-            # self.lora_vit.head = nn.Linear(
-            #     self.dim, num_classes)
     
     def swith_lora(self, idx:int):
         for t_layer_i, blk in enumerate(self.lora_vit.blocks):
@@ -677,8 +616,6 @@ class LoRA_Swin_timm(nn.Module):
 
         assert r > 0
 
-        # dim = vit_model.head.in_features
-        # create for storage, then we can init them or load weights
         self.w_As = []  # These are linear layers
         self.w_Bs = []
         self.wnew_As = []
@@ -787,16 +724,6 @@ class LoRA_Swin_timm(nn.Module):
                 saved_key = f"w_b_{i:03d}"
                 saved_tensor = f.get_tensor(saved_key)
                 w_B_linear.weight = Parameter(saved_tensor)
-
-            # for i, wnew_A_linear in enumerate(self.wnew_As):
-            #     saved_key = f"w_a_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_A_linear.weight = Parameter(saved_tensor)
-
-            # for i, wnew_B_linear in enumerate(self.wnew_Bs):
-            #     saved_key = f"w_b_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     wnew_B_linear.weight = Parameter(saved_tensor)
                 
             _in = self.lora_swin.head.in_features
             _out = self.lora_swin.head.fc.weight.shape[0]
@@ -826,8 +753,7 @@ class LoRA_Swin_timm(nn.Module):
         for w_B in self.w_Bs:
             nn.init.zeros_(w_B.weight)
         for wnew_A in self.wnew_As:
-            # nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
-            nn.init.zeros_(wnew_A.weight)
+            nn.init.kaiming_uniform_(wnew_A.weight, a=math.sqrt(5))
         for wnew_B in self.wnew_Bs:
             nn.init.zeros_(wnew_B.weight)
 

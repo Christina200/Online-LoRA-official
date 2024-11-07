@@ -6,6 +6,10 @@
 # Added code for Simple Continual Learning datasets
 # -- Jaeho Lee, dlwogh9344@khu.ac.kr
 # ------------------------------------------
+# Modification:
+# Added code for Imagenet-R and Imagenet-Sketch
+# -- Xiwen Wei
+# ------------------------------------------
 import os
 
 import os.path
