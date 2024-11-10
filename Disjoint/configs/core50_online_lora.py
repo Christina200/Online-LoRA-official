@@ -88,7 +88,7 @@ def get_args_parser(subparsers):
     subparsers.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
 
     # Continual learning parameters
-    subparsers.add_argument('--num_tasks', default=8, type=int, help='number of sequential tasks')
+    subparsers.add_argument('--num_tasks', default=1, type=int, help='number of sequential tasks')
     subparsers.add_argument('--train_mask', default=False, type=bool, help='if using the class mask at training')
     subparsers.add_argument('--task_inc', default=False, type=bool, help='if doing task incremental')
 
