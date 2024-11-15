@@ -138,6 +138,14 @@ python -m torch.distributed.launch \
 
 ## Reference
 If our code and paper help you, please kindly cite:
+```bibtex
+@article{wei2024online,
+  title={Online-LoRA: Task-free Online Continual Learning via Low Rank Adaptation},
+  author={Wei, Xiwen and Li, Guihong and Marculescu, Radu},
+  journal={arXiv preprint arXiv:2411.05663},
+  year={2024}
+}
+```
 
 ## Acknowledgement
 
